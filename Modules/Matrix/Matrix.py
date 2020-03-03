@@ -16,9 +16,107 @@ class Matrix:
         for row in self.data:
             printing+="|"
             for col in row:
-                printing+= " " + str(col)
+                printing+= " " + str(round(col,2))
             printing+="|\n"
         return printing
+
+    def __iadd__ (self,other):
+        if type(other) is int or float:
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    self.data[i][j] += other
+        elif type(other) is Matrix:
+            if other.rows == self.rows and other.columns == self.columns:
+                for i in range(self.rows):
+                    for j in range(self.columns):
+                        self.data[i][j] += other.data[i][j]
+            else:
+                raise Exception("Error: m need to be same row and same columns num")
+        else:
+            raise Exception("m is not an int nor a Matrix")
+
+    def __add__ (self,other):
+        if type(other) is int or float:
+            res = Matrix(self.rows,self.columns)
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    res.data[i][j] = self.data[i][j] + other
+            return res
+        elif type(other) is Matrix:
+            if other.rows == self.rows and other.columns == self.columns:
+                res = Matrix(self.rows,self.columns)
+                for i in range(self.rows):
+                    for j in range(self.columns):
+                        res.data[i][j] = self.data[i][j] + other.data[i][j]
+                return res
+            else:
+                raise Exception("Error: m need to be same row and same columns num")
+        else:
+            raise Exception("m is not an int nor a Matrix")
+
+    def __isub__ (self,other):
+        if type(other) is int or float:
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    self.data[i][j] -= other
+        elif type(other) is Matrix:
+            if other.rows == self.rows and other.columns == self.columns:
+                for i in range(self.rows):
+                    for j in range(self.columns):
+                        self.data[i][j] -= other.data[i][j]
+            else:
+                raise Exception("Error: m need to be same row and same columns num")
+        else:
+            raise Exception("m is not an int nor a Matrix")
+
+    def __sub__ (self,other):
+        if type(other) is int or float:
+            res = Matrix(self.rows,self.columns)
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    res.data[i][j] = self.data[i][j] - other
+            return res
+        elif type(other) is Matrix:
+            if other.rows == self.rows and other.columns == self.columns:
+                res = Matrix(self.rows,self.columns)
+                for i in range(self.rows):
+                    for j in range(self.columns):
+                        res.data[i][j] = self.data[i][j] - other.data[i][j]
+                return res
+            else:
+                raise Exception("Error: m need to be same row and same columns num")
+        else:
+            raise Exception("m is not an int nor a Matrix")
+
+    def __imul__(self,other):
+        try:
+            newmat = Matrix(self.rows,self.columns)
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    newmat.data[i][j] = self.data[i][j] * other
+        except TypeError:
+            print("'*=' operation only handle int or float")
+
+    def __mul__(self,other):
+        if type(other) is Matrix:
+            if self.columns == other.rows:
+                newmat=Matrix(self.rows,other.columns)
+                for i in range(self.rows):
+                    for j in range(other.columns):
+                        tempsum=0
+                        for b in range(self.columns): # or metruc.tows
+                            tempsum+=self.data[i][b]*other.data[b][j]
+                        newmat.data[i][j]=tempsum
+                return newmat
+            else:
+                raise ValueError
+        elif type(other) is int or float:
+            newmat = Matrix(self.rows,self.columns)
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    newmat.data[i][j] = self.data[i][j] * other
+        else:
+            raise TypeError
 
     @staticmethod
     def fromArray(inputs):
@@ -50,45 +148,13 @@ class Matrix:
         self.data=tempmatrix
         self.rows,self.columns = self.columns,self.rows
 
-    def add(self,m):
-        if type(m) is int:
-            for i in range(self.rows):
-                for j in range(self.columns):
-                    self.data[i][j]+=m
-
-        elif type(m) is Matrix:
-            if m.rows == self.rows and m.columns == self.columns:
-                for i in range(self.rows):
-                    for j in range(self.columns):
-                        self.data[i][j]+=m.data[i][j]
-            else:
-                raise Exception("Error: m need to be same row and same columns num")
-        else:
-            "m is not an int nor a Matrix"
-
-    def map(self,func):
-        for i in range(self.rows):
-            for j in range(self.columns):
-                self.data[i][j]=func(self.data[i][j])
-
-    def scalar_multiply(self,n):
-        for i in range(self.rows):
-            for j in range(self.columns):
-                self.data[i][j]*=n
-
     @staticmethod
-    def multiply(metrix,metrux):
-        if type(metrux) is Matrix and type(metrix) is Matrix:
-            if metrix.columns == metrux.rows:
-                newmat=Matrix(metrix.rows,metrux.columns)
-                for i in range(metrix.rows):
-                    for j in range(metrux.columns):
-                        tempsum=0
-                        for b in range(metrix.columns): # or metruc.tows
-                            tempsum+=metrix.data[i][b]*metrux.data[b][j]
-                        newmat.data[i][j]=tempsum
-                return newmat
-            else:
-                raise "Error"
+    def map(func,matrix):
+        if type(matrix) is not Matrix:
+            raise Exception(matrix," is not a matrix")
         else:
-            raise "Error"
+            m=Matrix(matrix.rows,matrix.columns)
+            for i in range(m.rows):
+                for j in range(m.columns):
+                    m.data[i][j]=func(matrix.data[i][j])
+            return m
