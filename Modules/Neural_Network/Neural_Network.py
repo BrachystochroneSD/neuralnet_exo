@@ -45,7 +45,6 @@ class NeuralNet:
         self.zed_matrices=[]
         self.activations_matrices=[]
 
-        self.Nabla_act_matrices=[]
         self.Nabla_weigth_matrices=[]
         self.Nabla_biases_matrices=[]
 
@@ -80,13 +79,13 @@ class NeuralNet:
         Return : None
         '''
         self.activations_matrices.append(inputs)
+        self.zed_matrices.append(inputs)
         for i in range(self.layers_number - 1):
-            curr_mat = self.activations_matrices[i]
-            new_zed_mat = Matrix.multiply(self.weights_matrices[i],curr_mat)
-            new_zed_mat.add(self.biaises_matrices[i])
-            self.zed_matrices.append(new_zed_mat)
-            new_act_mat = Matrix.map(self.sigmoid,new_zed_mat)
-            self.activations_matrices.append(new_act_mat)
+            zed_mat = self.weights_matrices[i] * self.activations_matrices[i]
+            zed_mat += self.biaises_matrices[i]
+            self.zed_matrices.append(zed_mat)
+            act_mat = Matrix.map(self.sigmoid,zed_mat)
+            self.activations_matrices.append(act_mat)
 
     def propagate_backward (self,answers):
         '''
@@ -94,7 +93,7 @@ class NeuralNet:
         it with the answer (Matrix nx1 object with
         n = number of outpus of the network)
 
-        answers need to be a Matrix type
+        answers need to be a Matrix type (TODO: fromArray in that func?)
 
         Return :
             - nabla_weights (list of matrices)
@@ -102,16 +101,30 @@ class NeuralNet:
         '''
         # Nabla_activate calculus will
 
-        # from the last to the first excluding inputs
-        for layer in range(self.layers_number - 1).__reversed__():
-            curr_active_mat = self.activations_matrices[layer]
-            Dact = Matrix(curr_active_mat.rows,curr_active_mat.columns)
-            Dact.add()
-            Dact = Matrix.multiply(curr_active_mat,)
+        # first : outputs, last position in the act_matrices list
+        DCa = self.activations_matrices[-1] - answers
+        DCa *= 2
+        # from the last to the first excluding inputs and outputs
+        Nabla_b=[]
+        Nabla_w=[]
+        for layer in reversed(range(1,self.layers_number)):
+            sigpZ = Matrix.map(self.sigmoidprim,self.zed_matrices[layer])
+            W = self.weights_matrices[layer - 1]
+            DCb = sigpZ * DCa
+            DZw = self.activations_matrices[layer - 1]
+            DCw = DZw * sigpZ * DCa  # need to check that
+            Nabla_b.insert(0, DCb)
+            Nabla_w.insert(0, DCw)
+            DCa = W * sigpZ * DCa
+        return Nabla_b,Nabla_w
 
 
-
-
+'''
+act [i,h1,h2,o]
+zed [i,h1,h2,o]
+wei [ih1,h1h2,h2o]
+b [h1,h2,o]
+'''
 
     def train (self,inputs,answers):
         '''

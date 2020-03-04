@@ -21,22 +21,24 @@ class Matrix:
         return printing
 
     def __iadd__ (self,other):
-        if type(other) is int or float:
+        if type(other) is int or type(other) is float:
             for i in range(self.rows):
                 for j in range(self.columns):
                     self.data[i][j] += other
+            return self
         elif type(other) is Matrix:
             if other.rows == self.rows and other.columns == self.columns:
                 for i in range(self.rows):
                     for j in range(self.columns):
                         self.data[i][j] += other.data[i][j]
+                return self
             else:
                 raise Exception("Error: m need to be same row and same columns num")
         else:
             raise Exception("m is not an int nor a Matrix")
 
     def __add__ (self,other):
-        if type(other) is int or float:
+        if type(other) is int or type(other) is float:
             res = Matrix(self.rows,self.columns)
             for i in range(self.rows):
                 for j in range(self.columns):
@@ -55,22 +57,24 @@ class Matrix:
             raise Exception("m is not an int nor a Matrix")
 
     def __isub__ (self,other):
-        if type(other) is int or float:
+        if type(other) is int or type(other) is float:
             for i in range(self.rows):
                 for j in range(self.columns):
                     self.data[i][j] -= other
+            return self
         elif type(other) is Matrix:
             if other.rows == self.rows and other.columns == self.columns:
                 for i in range(self.rows):
                     for j in range(self.columns):
                         self.data[i][j] -= other.data[i][j]
+                return self
             else:
                 raise Exception("Error: m need to be same row and same columns num")
         else:
             raise Exception("m is not an int nor a Matrix")
 
     def __sub__ (self,other):
-        if type(other) is int or float:
+        if type(other) is int or type(other) is float:
             res = Matrix(self.rows,self.columns)
             for i in range(self.rows):
                 for j in range(self.columns):
@@ -90,10 +94,10 @@ class Matrix:
 
     def __imul__(self,other):
         try:
-            newmat = Matrix(self.rows,self.columns)
             for i in range(self.rows):
                 for j in range(self.columns):
-                    newmat.data[i][j] = self.data[i][j] * other
+                    self.data[i][j] *= other
+            return self
         except TypeError:
             print("'*=' operation only handle int or float")
 
@@ -110,11 +114,12 @@ class Matrix:
                 return newmat
             else:
                 raise ValueError
-        elif type(other) is int or float:
+        elif type(other) is int or type(other) is float:
             newmat = Matrix(self.rows,self.columns)
             for i in range(self.rows):
                 for j in range(self.columns):
                     newmat.data[i][j] = self.data[i][j] * other
+            return newmat
         else:
             raise TypeError
 
@@ -131,7 +136,6 @@ class Matrix:
             for j in range(self.columns):
                 arr.append(self.data[i][j])
         return arr
-
 
     def randomize(self,n = 1):
         for i in range(self.rows):
