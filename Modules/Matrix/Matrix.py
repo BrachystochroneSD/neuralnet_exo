@@ -162,3 +162,14 @@ class Matrix:
                 for j in range(m.columns):
                     m.data[i][j]=func(matrix.data[i][j])
             return m
+
+    @staticmethod
+    def scalar_mul(matrix,metrux):
+        try:
+            m = Matrix(matrix.rows,matrix.columns)
+            for i in range(matrix.rows):
+                for j in range(matrix.columns):
+                    m.data[i][j] = matrix.data[i][j] * metrux.data[i][j]
+            return m
+        except (TypeError,IndexError) as err:
+            print("Error: {}. {} {} {} {}".format(err,matrix.rows,matrix.columns,metrux.rows,metrux.columns))
