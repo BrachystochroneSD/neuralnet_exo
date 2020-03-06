@@ -5,5 +5,7 @@ nn=NeuralNet(2,3,3,1)
 
 inputs=Matrix.fromArray([1,2])
 nn.feed_forward(inputs)
+answers=Matrix.fromArray([3])
+nn.propagate_backward(answers)
 
 print(nn)

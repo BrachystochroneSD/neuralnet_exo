@@ -103,32 +103,27 @@ class NeuralNet:
 
         # first : outputs, last position in the act_matrices list
         DCa = self.activations_matrices[-1] - answers
-        DCa *= 2
         # from the last to the first excluding inputs and outputs
         Nabla_b=[]
         Nabla_w=[]
         for layer in reversed(range(1,self.layers_number)):
             sigpZ = Matrix.map(self.sigmoidprim,self.zed_matrices[layer])
             W = self.weights_matrices[layer - 1]
-            DCb = sigpZ * DCa
+            DCb = Matrix.scalar_mul(sigpZ, DCa)
             DZw = self.activations_matrices[layer - 1]
-            DCw = DZw * sigpZ * DCa  # need to check that
+            DCw=Matrix(W.rows,W.columns)
+            for i in range(DCw.rows):
+                for j in range(DCw.columns):
+                    DCw.data[i][j] = DZw.data[j][0] * sigpZ.data[i][0] * DCa.data[i][0]
             Nabla_b.insert(0, DCb)
             Nabla_w.insert(0, DCw)
-            DCa = W * sigpZ * DCa
+            DCa = DCa * W
+            DCa = Matrix.scalar_mul(sigpZ,DCa)
         return Nabla_b,Nabla_w
-
-
-'''
-act [i,h1,h2,o]
-zed [i,h1,h2,o]
-wei [ih1,h1h2,h2o]
-b [h1,h2,o]
-'''
 
     def train (self,inputs,answers):
         '''
-        feed_forward and back_propagade
+        feed_forward and back_propagade n times
         '''
         self.feed_forward(inputs)
         nabla_w,nabla_b = self.propagate_backward(answers)
@@ -136,7 +131,8 @@ b [h1,h2,o]
 
     @staticmethod
     def add_to_nablas(nabla_w,nabla_b):
-        print("TODO")
+        self.Nabla_weigth_matrices=nabla_w
+        self.Nabla_biases_matrices=nabla_b
 
     def adjust(self):
         '''
