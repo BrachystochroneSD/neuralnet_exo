@@ -143,14 +143,11 @@ class Matrix:
                 self.data[i][j]+=random.uniform(-n,n)
 
     def transpose(self):
-        tempmatrix=[]
-        for j in range(self.columns):
-            temprow=[]
-            for i in range(self.rows):
-                temprow.append(self.data[i][j])
-            tempmatrix.append(temprow)
-        self.data=tempmatrix
-        self.rows,self.columns = self.columns,self.rows
+        m = Matrix(self.columns,self.rows)
+        for i in range(m.rows):
+            for j in range(m.columns):
+                m.data[i][j] = self.data[j][i]
+        return m
 
     @staticmethod
     def map(func,matrix):
@@ -164,7 +161,10 @@ class Matrix:
             return m
 
     @staticmethod
-    def scalar_mul(matrix,metrux):
+    def had_prod(matrix,metrux):
+        '''
+        Hadamard Product of two matrices
+        '''
         try:
             m = Matrix(matrix.rows,matrix.columns)
             for i in range(matrix.rows):

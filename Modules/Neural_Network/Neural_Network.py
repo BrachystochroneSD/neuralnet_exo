@@ -45,8 +45,14 @@ class NeuralNet:
         self.zed_matrices=[]
         self.activations_matrices=[]
 
+        # initialize the Nabla_weigth TODO: make it more elegant
         self.Nabla_weigth_matrices=[]
         self.Nabla_biases_matrices=[]
+        for i in range(self.layers_number - 1):
+            matw = Matrix(self.neuron_number[i+1],self.neuron_number[i])
+            matb = Matrix(self.neuron_number[i+1],1)
+            self.Nabla_biases_matrices.append(matb)
+            self.Nabla_weigth_matrices.append(matw)
 
     def __str__ (self):
         printage=""
@@ -87,7 +93,7 @@ class NeuralNet:
             act_mat = Matrix.map(self.sigmoid,zed_mat)
             self.activations_matrices.append(act_mat)
 
-    def propagate_backward (self,answers):
+    def backpropagation (self,answers):
         '''
         One wave of Nabla calculus by comparing
         it with the answer (Matrix nx1 object with
@@ -99,44 +105,58 @@ class NeuralNet:
             - nabla_weights (list of matrices)
             - nabla_biaises (list of matrices)
         '''
-        # Nabla_activate calculus will
 
-        # first : outputs, last position in the act_matrices list
-        DCa = self.activations_matrices[-1] - answers
-        # from the last to the first excluding inputs and outputs
         Nabla_b=[]
         Nabla_w=[]
-        for layer in reversed(range(1,self.layers_number)):
-            sigpZ = Matrix.map(self.sigmoidprim,self.zed_matrices[layer])
-            W = self.weights_matrices[layer - 1]
-            DCb = Matrix.scalar_mul(sigpZ, DCa)
-            DZw = self.activations_matrices[layer - 1]
-            DCw=Matrix(W.rows,W.columns)
-            for i in range(DCw.rows):
-                for j in range(DCw.columns):
-                    DCw.data[i][j] = DZw.data[j][0] * sigpZ.data[i][0] * DCa.data[i][0]
-            Nabla_b.insert(0, DCb)
-            Nabla_w.insert(0, DCw)
-            DCa = DCa * W
-            DCa = Matrix.scalar_mul(sigpZ,DCa)
-        return Nabla_b,Nabla_w
 
-    def train (self,inputs,answers):
+        # first : outputs, last position in the act_matrices list
+        DCaL = self.activations_matrices[-1] - answers
+        sigpZ = Matrix.map(self.sigmoidprim,self.zed_matrices[-1])
+        error = Matrix.had_prod(DCaL,sigpZ)
+        # from the last to the first excluding inputs and outputs
+        for layer in reversed(range(1,self.layers_number)):
+            # error on biaises
+            dCb = error
+            Nabla_b.insert(0,dCb)
+            # weight
+            ac = self.activations_matrices[layer - 1]
+            dCw = Matrix(error.rows,ac.rows)
+            for j in range(dCw.rows):
+                for k in range(dCw.columns):
+                    lej = error.data[j][0]
+                    ack = ac.data[k][0]
+                    dCw.data[j][k] = ack * lej
+            Nabla_w.insert(0,dCw)
+            # new local error
+            mat_mul = self.weights_matrices[layer - 1].transpose() * error
+            sigpZ = Matrix.map(self.sigmoidprim,self.zed_matrices[layer - 1])
+            error = Matrix.had_prod(mat_mul,sigpZ)
+        return Nabla_w,Nabla_b
+
+    def train (self,inputs_arr,answers_arr):
         '''
         feed_forward and back_propagade n times
         '''
+        inputs = Matrix.fromArray(inputs_arr)
+        answers = Matrix.fromArray(answers_arr)
         self.feed_forward(inputs)
-        nabla_w,nabla_b = self.propagate_backward(answers)
-        self.add_to_nablas(nabla_w,nabla_b)
+        nabla_w,nabla_b = self.backpropagation(answers)
+        for i in range(self.layers_number - 1):
+            self.Nabla_weigth_matrices[i] += nabla_w[i]
+            self.Nabla_biases_matrices[i] += nabla_b[i]
 
-    @staticmethod
-    def add_to_nablas(nabla_w,nabla_b):
-        self.Nabla_weigth_matrices=nabla_w
-        self.Nabla_biases_matrices=nabla_b
-
-    def adjust(self):
+    def adjust(self,lr):
         '''
         Substract the sotre big_nabla_gradient to the
         matrices of weight and biaises
+        Get learning rate
         '''
-        print("TODO")
+        for i in range(self.layers_number - 1):
+            self.weights_matrices[i] += self.Nabla_weigth_matrices[i] * lr
+            self.biaises_matrices[i] += self.Nabla_biases_matrices[i] * lr
+            self.Nabla_weigth_matrices[i] *= 0 # reinitialize Nabla
+            self.Nabla_biases_matrices[i] *= 0 # reinitialize Nabla
+
+    def output(self,inputs):
+        self.feed_forward(inputs)
+        return self.activations_matrices[-1]
