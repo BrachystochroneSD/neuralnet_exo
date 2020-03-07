@@ -1,6 +1,8 @@
 * NeuralNet Exo
 
-This git repo is just my first step to understand and practice the basics of Machine Learning and Neural Network.
-I used python for obvious reason. This first test is not meant to be efficient and I don't plan to create a better module.
+Just my first step to understand and practice the basics of Machine Learning and Neural Network.
+This first test is not meant to be efficient. It's just for learning.
 
 As a reference, I used /Neuronale Netze und Matrix Produkt Zustände/ by /David Maier/
+
+I've created the Matrix module used for matrix operations.
