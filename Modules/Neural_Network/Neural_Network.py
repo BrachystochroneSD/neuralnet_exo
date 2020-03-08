@@ -157,6 +157,7 @@ class NeuralNet:
             self.Nabla_weigth_matrices[i] *= 0 # reinitialize Nabla
             self.Nabla_biases_matrices[i] *= 0 # reinitialize Nabla
 
-    def output(self,inputs):
+    def output(self,inputs_arr):
+        inputs = Matrix.fromArray(inputs_arr)
         self.feed_forward(inputs)
         return self.activations_matrices[-1]
