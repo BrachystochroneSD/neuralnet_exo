@@ -57,7 +57,7 @@ class NeuralNet:
     def __str__ (self):
         printage=""
         for i in range(self.layers_number - 1):
-            printage += "--------"
+            printage += "--------\n"
             printage += "Activation" + str(i) + "\n"
             printage += str(self.activations_matrices[i])
             printage += "Weight\n"
@@ -65,9 +65,17 @@ class NeuralNet:
             printage += "biaises\n"
             printage += str(self.biaises_matrices[i])
             printage += "\n"
-        printage += "--------"
+        printage += "--------\n"
         printage += "Activation" + str(i) + "\n"
         printage += str(self.activations_matrices[self.layers_number - 1])
+        printage += "--------\n"
+        printage += "Nabla biases matrices:\n"
+        for mat in self.Nabla_biases_matrices:
+            printage += str(mat)
+        printage += "--------\n"
+        printage += "Nabla wieght matrices:\n"
+        for mat in self.Nabla_weigth_matrices:
+            printage += str(mat)
         return printage
     # static functions used
     @staticmethod
