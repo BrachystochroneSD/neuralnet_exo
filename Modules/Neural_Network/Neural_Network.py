@@ -78,14 +78,18 @@ class NeuralNet:
     def sigmoidprim (x):
         return math.e**x / ( math.e**x + 1 )**2
 
-    def feed_forward (self,inputs):
+    def feed_forward (self,inputs_arr):
         '''
         Caclulate the activations and zed matrices
         and fill the appropriates lists
         Return : None
         '''
-        self.activations_matrices.append(inputs)
-        self.zed_matrices.append(inputs)
+        inputs = Matrix.fromArray(inputs_arr)
+
+        self.activations_matrices = []
+        self.zed_matrices = []
+        self.activations_matrices = [inputs]
+        self.zed_matrices = [inputs]
         for i in range(self.layers_number - 1):
             zed_mat = self.weights_matrices[i] * self.activations_matrices[i]
             zed_mat += self.biaises_matrices[i]
@@ -93,7 +97,7 @@ class NeuralNet:
             act_mat = Matrix.map(self.sigmoid,zed_mat)
             self.activations_matrices.append(act_mat)
 
-    def backpropagation (self,answers):
+    def backpropagation (self,answers_arr):
         '''
         One wave of Nabla calculus by comparing
         it with the answer (Matrix nx1 object with
@@ -105,6 +109,7 @@ class NeuralNet:
             - nabla_weights (list of matrices)
             - nabla_biaises (list of matrices)
         '''
+        answers = Matrix.fromArray(answers_arr)
 
         Nabla_b=[]
         Nabla_w=[]
@@ -137,10 +142,8 @@ class NeuralNet:
         '''
         feed_forward and back_propagade n times
         '''
-        inputs = Matrix.fromArray(inputs_arr)
-        answers = Matrix.fromArray(answers_arr)
-        self.feed_forward(inputs)
-        nabla_w,nabla_b = self.backpropagation(answers)
+        self.feed_forward(inputs_arr)
+        nabla_w,nabla_b = self.backpropagation(answers_arr)
         for i in range(self.layers_number - 1):
             self.Nabla_weigth_matrices[i] += nabla_w[i]
             self.Nabla_biases_matrices[i] += nabla_b[i]
@@ -152,12 +155,11 @@ class NeuralNet:
         Get learning rate
         '''
         for i in range(self.layers_number - 1):
-            self.weights_matrices[i] += self.Nabla_weigth_matrices[i] * lr
-            self.biaises_matrices[i] += self.Nabla_biases_matrices[i] * lr
+            self.weights_matrices[i] -= self.Nabla_weigth_matrices[i] * lr
+            self.biaises_matrices[i] -= self.Nabla_biases_matrices[i] * lr
             self.Nabla_weigth_matrices[i] *= 0 # reinitialize Nabla
             self.Nabla_biases_matrices[i] *= 0 # reinitialize Nabla
 
     def output(self,inputs_arr):
-        inputs = Matrix.fromArray(inputs_arr)
-        self.feed_forward(inputs)
+        self.feed_forward(inputs_arr)
         return self.activations_matrices[-1]
